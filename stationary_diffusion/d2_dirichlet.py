@@ -3,6 +3,16 @@ import sympy as sp
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import splu
 
+# Discretization of -(a1 u_x)_x - (a2 u_y)_y = f on (0, 1)^2 with homogeneous
+# Dirichlet BCs on all four sides: u(x, 0) = u(0, y) = u(x, 1) = u(1, y) = 0.
+#
+# Grid: nodes x_i = i*h_x, i = 0, ..., N+1 (similarly for y), with h_x = 1/(N+1).
+# The boundary nodes i=0 and i=N+1 carry the Dirichlet value 0 and are
+# eliminated, leaving N unknowns i = 1, ..., N per direction (indexed 0, ...,
+# N-1 in the code below). Fluxes are evaluated at the N+1 half-points between
+# consecutive nodes (boundary nodes included), giving the standard central
+# finite-difference stencil for a variable-coefficient Laplacian.
+
 def get_discretization_data(N):
     N_x = N_y = N
 
@@ -30,16 +40,14 @@ def get_discretization_data(N):
 
     rows = np.concatenate([diag.reshape(-1,), diag[mask_i_m], diag[mask_i_p], diag[mask_j_m], diag[mask_j_p]])
     cols = np.concatenate([diag.reshape(-1,), i_m[mask_i_m], i_p[mask_i_p], j_m[mask_j_m], j_p[mask_j_p]])
-    indices = np.stack([cols, rows], 1)
+    indices = np.stack([rows, cols], 1)
     return mask_i_m, mask_i_p, mask_j_m, mask_j_p, X_half, Y_half, X, Y, indices
 
-def get_csc_matrix(mask_i_m, mask_i_p, mask_j_m, mask_j_p, X_half, Y_half, X, Y, indices, a, params):
-    a1_p = a(X_half[1:], Y, params)
-    a1_m = a(X_half[:-1], Y, params)
-    a2_p = a(X, Y_half[:, 1:], params)
-    a2_m = a(X, Y_half[:, :-1], params)
-    a1 = a(X, Y, params)
-    a2 = a(X, Y, params)
+def get_csc_matrix(mask_i_m, mask_i_p, mask_j_m, mask_j_p, X_half, Y_half, X, Y, indices, a1, a2, params):
+    a1_p = a1(X_half[1:], Y, params)
+    a1_m = a1(X_half[:-1], Y, params)
+    a2_p = a2(X, Y_half[:, 1:], params)
+    a2_m = a2(X, Y_half[:, :-1], params)
 
     data = np.concatenate([
         (a1_p + a1_m + a2_p + a2_m).reshape(-1,),
@@ -58,7 +66,7 @@ def discretization_test():
     a = sp.exp(1 + 0.5*sp.cos(sp.pi*(x + 3*y)))
     u = (x*y + 3*y + sp.exp(2*x + y/2))*sp.sin(sp.pi*x)*sp.sin(sp.pi*y)
     f = - (a * u.diff('x')).diff('x') - (a * u.diff('y')).diff('y')
-    
+
     a = sp.lambdify((x, y, p), a, 'numpy')
     u = sp.lambdify((x, y), u, 'numpy')
     f = sp.lambdify((x, y), f, 'numpy')
@@ -68,7 +76,7 @@ def discretization_test():
     errors = []
     for N in Ns:
         mask_i_m, mask_i_p, mask_j_m, mask_j_p, X_half, Y_half, X, Y, indices = get_discretization_data(N)
-        A = get_csc_matrix(mask_i_m, mask_i_p, mask_j_m, mask_j_p, X_half, Y_half, X, Y, indices, a, params)
+        A = get_csc_matrix(mask_i_m, mask_i_p, mask_j_m, mask_j_p, X_half, Y_half, X, Y, indices, a, a, params)
         A = splu(A)
         rhs = f(X, Y) * (X[1, 0] - X[0, 0])**2
         sol = A.solve(rhs.reshape(-1,))
@@ -79,3 +87,37 @@ def discretization_test():
     slope, _ = np.polyfit(np.log10(Ns), np.log10(errors), 1)
     print("expecting convergence order", -2)
     print("observed convergence order", slope)
+
+
+def discretization_test_anisotropic():
+    x, y, p = sp.symbols('x, y, p')
+    a1 = sp.exp(1 + 0.5*sp.cos(sp.pi*(x + 3*y)))
+    a2 = 1 + 0.5*sp.sin(sp.pi*(2*x - y))
+    u = (x*y + 3*y + sp.exp(2*x + y/2))*sp.sin(sp.pi*x)*sp.sin(sp.pi*y)
+    f = - (a1 * u.diff('x')).diff('x') - (a2 * u.diff('y')).diff('y')
+
+    a1 = sp.lambdify((x, y, p), a1, 'numpy')
+    a2 = sp.lambdify((x, y, p), a2, 'numpy')
+    u = sp.lambdify((x, y), u, 'numpy')
+    f = sp.lambdify((x, y), f, 'numpy')
+
+    params = None
+    Ns = [16, 32, 64, 128, 256]
+    errors = []
+    for N in Ns:
+        mask_i_m, mask_i_p, mask_j_m, mask_j_p, X_half, Y_half, X, Y, indices = get_discretization_data(N)
+        A = get_csc_matrix(mask_i_m, mask_i_p, mask_j_m, mask_j_p, X_half, Y_half, X, Y, indices, a1, a2, params)
+        A = splu(A)
+        rhs = f(X, Y) * (X[1, 0] - X[0, 0])**2
+        sol = A.solve(rhs.reshape(-1,))
+        exact = u(X, Y).reshape(-1, )
+        error = np.linalg.norm(sol - exact) / np.linalg.norm(exact)
+        errors.append(error)
+    errors = np.array(errors)
+    slope, _ = np.polyfit(np.log10(Ns), np.log10(errors), 1)
+    print("expecting convergence order", -2)
+    print("observed convergence order", slope)
+
+if __name__ == "__main__":
+    discretization_test()
+    discretization_test_anisotropic()

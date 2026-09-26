@@ -25,7 +25,7 @@ $$
 Nodes are placed on a uniform grid covering $[0, 1]$ in each direction:
 
 $$
-x_i = i\,h, \quad i = 0, \dots, N, \qquad\qquad y_j = j\,h, \quad j = 0, \dots, N.
+x_i = i~h, \quad i = 0, \dots, N, \qquad\qquad y_j = j~h, \quad j = 0, \dots, N.
 $$
 
 * In $x$, the node $x_N = 1$ carries the known Dirichlet value $u(1, y) = 0$ and is eliminated from the system, leaving $N$ unknowns $i = 0, \dots, N-1$. The node $x_0 = 0$ is the Neumann boundary and **is** kept as an unknown.
@@ -42,7 +42,7 @@ $$
 with coefficients sampled there:
 
 $$
-a_1^{i+1/2,\,j} = a_1(x_{i+1/2}, y_j), \qquad a_2^{i,\,j+1/2} = a_2(x_i, y_{j+1/2}).
+a_1^{i+1/2,~j} = a_1(x_{i+1/2}, y_j), \qquad a_2^{i,~j+1/2} = a_2(x_i, y_{j+1/2}).
 $$
 
 There are $N_x$ faces in $x$ ($i = 0, \dots, N_x-1$, the last one $x_{N_x - 1/2}$ lying next to the eliminated Dirichlet node) and $N_y - 1$ faces in $y$ ($j = 0, \dots, N_y - 2$).
@@ -51,9 +51,9 @@ There are $N_x$ faces in $x$ ($i = 0, \dots, N_x-1$, the last one $x_{N_x - 1/2}
 
 Away from the Neumann boundaries the discretization is the same conservative, central, second-order finite-difference stencil used for the Dirichlet problem: for $1 \le i \le N_x - 1$ and $1 \le j \le N_y - 2$,
 
-$$\left(a_1^{i+1/2,j} + a_1^{i-1/2,j} + a_2^{i,j+1/2} + a_2^{i,j-1/2}\right)\, u_{i,j} - a_1^{i+1/2,j}\, u_{i+1,j} - a_1^{i-1/2,j}\, u_{i-1,j} - a_2^{i,j+1/2}\, u_{i,j+1} - a_2^{i,j-1/2}\, u_{i,j-1} = f_{i,j}\, h^2 .$$
+$$\left(a_1^{i+1/2,j} + a_1^{i-1/2,j} + a_2^{i,j+1/2} + a_2^{i,j-1/2}\right)~ u_{i,j} - a_1^{i+1/2,j}~ u_{i+1,j} - a_1^{i-1/2,j}~ u_{i-1,j} - a_2^{i,j+1/2}~ u_{i,j+1} - a_2^{i,j-1/2}~ u_{i,j-1} = f_{i,j}~ h^2 .$$
 
-At $i = N_x - 1$ (the node next to the Dirichlet boundary $x_N = 1$) the term $a_1^{i+1/2,j}\,u_{i+1,j}$ is dropped because $u_{N_x,j} = 0$, while the coefficient $a_1^{i+1/2,j}$ still contributes to the diagonal — exactly as at the Dirichlet boundaries in `d2_dirichlet.py`.
+At $i = N_x - 1$ (the node next to the Dirichlet boundary $x_N = 1$) the term $a_1^{i+1/2,j}~u_{i+1,j}$ is dropped because $u_{N_x,j} = 0$, while the coefficient $a_1^{i+1/2,j}$ still contributes to the diagonal — exactly as at the Dirichlet boundaries in `d2_dirichlet.py`.
 
 ## Neumann boundaries: mirror ghost-node trick
 
@@ -66,7 +66,7 @@ $$-\left(a_1^{1/2,j}(u_{1,j}-u_{0,j}) - a_1^{-1/2,j}(u_{0,j}-u_{-1,j})\right),$$
 and substituting $u_{-1,j}=u_{1,j}$, $a_1^{-1/2,j}=a_1^{1/2,j}$ collapses the two flux terms into a single, doubled connection to the interior neighbor $i=1$:
 
 $$
-2\,a_1^{1/2,j}\, u_{0,j} \;-\; 2\,a_1^{1/2,j}\, u_{1,j} .
+2~a_1^{1/2,j}~ u_{0,j} ~-~ 2~a_1^{1/2,j}~ u_{1,j} .
 $$
 
 Adding the (unmodified) $y$-part gives the full equation at $(0,j)$, $=f_{0,j}h^2$.
@@ -74,11 +74,11 @@ Adding the (unmodified) $y$-part gives the full equation at $(0,j)$, $=f_{0,j}h^
 **Boundary $y = 0$ ($j = 0$)** and **boundary $y = 1$ ($j = N_y-1$)** are treated the same way, mirroring across each respective side, and again contribute only to the $y$-part of the equation:
 
 $$
-j=0: \qquad 2\,a_2^{i,1/2}\, u_{i,0} - 2\,a_2^{i,1/2}\, u_{i,1},
+j=0: \qquad 2~a_2^{i,1/2}~ u_{i,0} - 2~a_2^{i,1/2}~ u_{i,1},
 $$
 
 $$
-j=N_y-1: \qquad 2\,a_2^{i,N_y-3/2}\, u_{i,N_y-1} - 2\,a_2^{i,N_y-3/2}\, u_{i,N_y-2} .
+j=N_y-1: \qquad 2~a_2^{i,N_y-3/2}~ u_{i,N_y-1} - 2~a_2^{i,N_y-3/2}~ u_{i,N_y-2} .
 $$
 
 Since the $x$- and $y$-contributions are formed independently (the code builds `diag_x`/`diag_y` and the four off-diagonal weights separately and adds them), a node at a corner (e.g. $i=0, j=0$) simply combines the doubled rule from each direction, giving diagonal $2a_1^{1/2,0} + 2a_2^{0,1/2}$ and two doubled off-diagonal connections, to $(1,0)$ and to $(0,1)$.
@@ -88,13 +88,13 @@ Since the $x$- and $y$-contributions are formed independently (the code builds `
 Collecting the unknowns with the lexicographic ordering used in the code,
 
 $$
-k(i,j) = j + i\, N_y, \qquad i = 0,\dots,N_x-1,\quad j = 0,\dots,N_y-1,
+k(i,j) = j + i~ N_y, \qquad i = 0,\dots,N_x-1,\quad j = 0,\dots,N_y-1,
 $$
 
 gives a sparse linear system
 
 $$
-A\, \mathbf{u} = \mathbf{f}\, h^2 .
+A~ \mathbf{u} = \mathbf{f}~ h^2 .
 $$
 
 The diagonal entry at row $k(i,j)$ is always the sum of an $x$-contribution and a $y$-contribution, each computed independently by the following rule (this is exactly what `diag_x`/`diag_y` do in the code):
@@ -102,11 +102,11 @@ The diagonal entry at row $k(i,j)$ is always the sum of an $x$-contribution and 
 | direction | case | contribution to the diagonal |
 |---|---|---|
 | $x$ | interior, $0 < i < N_x - 1$ | $a_1^{i+1/2,j} + a_1^{i-1/2,j}$ |
-| $x$ | Neumann side, $i = 0$ | $2\,a_1^{1/2,j}$ |
+| $x$ | Neumann side, $i = 0$ | $2~a_1^{1/2,j}$ |
 | $x$ | Dirichlet side, $i = N_x - 1$ | $a_1^{i+1/2,j} + a_1^{i-1/2,j}$ (unchanged; the boundary value is $0$) |
 | $y$ | interior, $0 < j < N_y - 1$ | $a_2^{i,j+1/2} + a_2^{i,j-1/2}$ |
-| $y$ | Neumann side, $j = 0$ | $2\,a_2^{i,1/2}$ |
-| $y$ | Neumann side, $j = N_y - 1$ | $2\,a_2^{i,N_y - 3/2}$ |
+| $y$ | Neumann side, $j = 0$ | $2~a_2^{i,1/2}$ |
+| $y$ | Neumann side, $j = N_y - 1$ | $2~a_2^{i,N_y - 3/2}$ |
 
 and the off-diagonal entries of row $k(i,j)$ are:
 

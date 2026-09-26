@@ -59,6 +59,16 @@ At $i = N_x - 1$ (the node next to the Dirichlet boundary $x_N = 1$) the term $a
 
 At a Neumann boundary the derivative, not the value, is prescribed, so there is no boundary value to substitute. Instead, a standard second-order technique is used: introduce a fictitious *ghost* node just outside the domain, and choose its value to be the mirror image of the first interior value across the boundary; the flux coefficient on the (fictitious) face connecting the ghost node is likewise mirrored, i.e. taken equal to the coefficient at the real face right next to the boundary.
 
+**Why the mirror is accurate.** The substitution looks arbitrary at first, but it is exactly what the boundary condition forces on any smooth solution. Consider the 1D model $-u'' = f$ with $u'(0) = 0$ and write $u_0 = u(0)$, $u_1 = u(h)$, $u_{-1}$ for the (fictitious) value at $x=-h$. Extend $u$ to $x<0$ by even reflection, $\tilde u(x) = u(-x)$. Then $\tilde u'(x) = -u'(-x)$, so $\tilde u'(0^-) = -u'(0)$; for $\tilde u$ to have a continuous derivative at $x=0$ (i.e. to look like the smooth continuation a genuine solution would have) we need $\tilde u'(0^-) = u'(0^+)$, i.e. $-u'(0) = u'(0)$, i.e. $u'(0) = 0$ — precisely the Neumann condition. So homogeneous Neumann is exactly the condition under which the even reflection of $u$ is smooth across the boundary, and the mirror rule asks the ghost node to follow that reflection: $u_{-1} := u_1$.
+
+Quantitatively, Taylor-expand around $x=0$ using $u'(0)=0$:
+
+$$u(h) = u_0 + \frac{h^2}{2}u_0'' + \frac{h^3}{6}u_0''' + O(h^4), \qquad u(-h) = u_0 + \frac{h^2}{2}u_0'' - \frac{h^3}{6}u_0''' + O(h^4).$$
+
+The two expansions differ only in the $h$-odd terms, and the leading one ($h~u_0'$) already vanished thanks to the boundary condition, so $u(-h) - u(h) = O(h^3)$: setting $u_{-1} := u_1$ reproduces the true (unknown) ghost value to within $O(h^3)$. Equivalently, $u_{-1} = u_1$ is exactly the statement that the second-order accurate central-difference approximation of the boundary condition holds, $\frac{u_1 - u_{-1}}{2h} = 0$.
+
+Substituting the true solution into the resulting boundary stencil, $\frac{2}{h^2}(u_0 - u_1) = f_0$ in the constant-coefficient case, and Taylor-expanding shows its local truncation error is $O(h)$ — one order worse than the $O(h^2)$ interior stencil, a standard feature of ghost-point Neumann treatments. This does not degrade the *global* accuracy of the scheme: for an elliptic problem, an $O(h)$ error confined to the boundary (a lower-dimensional subset of the grid) is smoothed out by the elliptic solve and contributes only $O(h^2)$ to the solution error everywhere — exactly the second-order convergence confirmed numerically below.
+
 **Boundary $x = 0$ ($i = 0$).** The ghost node $i = -1$ is set to $u_{-1,j} := u_{1,j}$, and $a_1^{-1/2,j} := a_1^{1/2,j}$. The $x$-part of the flux balance at $i=0$ reads, before substitution,
 
 $$-\left(a_1^{1/2,j}(u_{1,j}-u_{0,j}) - a_1^{-1/2,j}(u_{0,j}-u_{-1,j})\right),$$
@@ -123,7 +133,7 @@ A corner node, e.g. $(i,j) = (0,0)$, simply combines the $x=0$ and $y=0$ rules: 
 
 ## Order of accuracy
 
-The mirror technique reproduces the Neumann condition to first order pointwise at the boundary row, but — as is standard for this construction — this does not degrade the global accuracy of the scheme: with a manufactured solution satisfying the prescribed boundary conditions exactly, `discretization_test()` in `d2_neumann.py` observes
+As explained above, the boundary rows are only first-order consistent, yet this does not degrade the global accuracy of the scheme: with a manufactured solution satisfying the prescribed boundary conditions exactly, `discretization_test()` in `d2_neumann.py` observes
 
 $$
 \|\mathbf{u}_h - u\| = O(h^2),

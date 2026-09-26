@@ -53,20 +53,20 @@ $$
 The scheme is the standard conservative (flux-form) second-order finite difference approximation of a divergence of a flux. For the $x$-derivative term, the flux $-a_1 u_x$ is approximated at the half-points by a central difference,
 
 $$
-\left(a_1 \frac{\partial u}{\partial x}\right)\bigg|_{x_{i+1/2}, y_j} \approx a_1^{i+1/2,\,j}\,\frac{u_{i+1,j} - u_{i,j}}{h},
+\left.a_1 \frac{\partial u}{\partial x}\right|_{x_{i+1/2}, y_j} \approx a_1^{i+1/2,\,j}\,\frac{u_{i+1,j} - u_{i,j}}{h},
 $$
 
 and the second derivative is obtained by differencing these fluxes again:
 
 $$
--\frac{\partial}{\partial x}\left(a_1 \frac{\partial u}{\partial x}\right)\bigg|_{x_i, y_j}
+\left.-\frac{\partial}{\partial x}\left(a_1 \frac{\partial u}{\partial x}\right)\right|_{x_i, y_j}
 \approx -\frac{a_1^{i+1/2,\,j}\left(u_{i+1,j}-u_{i,j}\right) - a_1^{i-1/2,\,j}\left(u_{i,j}-u_{i-1,j}\right)}{h^2}.
 $$
 
 The $y$-derivative term is discretized analogously with $a_2$ and half-points in $y$. Summing both contributions and multiplying through by $h^2$ gives, for every interior node $(i, j)$, $i, j = 0, \dots, N-1$, the five-point stencil equation
 
 $$
-\Big(a_1^{i+1/2,j} + a_1^{i-1/2,j} + a_2^{i,j+1/2} + a_2^{i,j-1/2}\Big)\, u_{i,j}
+\left(a_1^{i+1/2,j} + a_1^{i-1/2,j} + a_2^{i,j+1/2} + a_2^{i,j-1/2}\right)\, u_{i,j}
 - a_1^{i+1/2,j}\, u_{i+1,j} - a_1^{i-1/2,j}\, u_{i-1,j}
 - a_2^{i,j+1/2}\, u_{i,j+1} - a_2^{i,j-1/2}\, u_{i,j-1}
 = f_{i,j}\, h^2,

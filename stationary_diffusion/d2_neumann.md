@@ -56,7 +56,7 @@ There are $N_x$ faces in $x$ ($i = 0, \dots, N_x-1$, the last one $x_{N_x - 1/2}
 Away from the Neumann boundaries the discretization is the same conservative, central, second-order finite-difference stencil used for the Dirichlet problem: for $1 \le i \le N_x - 1$ and $1 \le j \le N_y - 2$,
 
 $$
-\Big(a_1^{i+1/2,j} + a_1^{i-1/2,j} + a_2^{i,j+1/2} + a_2^{i,j-1/2}\Big)\, u_{i,j}
+\left(a_1^{i+1/2,j} + a_1^{i-1/2,j} + a_2^{i,j+1/2} + a_2^{i,j-1/2}\right)\, u_{i,j}
 - a_1^{i+1/2,j}\, u_{i+1,j} - a_1^{i-1/2,j}\, u_{i-1,j}
 - a_2^{i,j+1/2}\, u_{i,j+1} - a_2^{i,j-1/2}\, u_{i,j-1}
 = f_{i,j}\, h^2 .
@@ -71,7 +71,7 @@ At a Neumann boundary the derivative, not the value, is prescribed, so there is 
 **Boundary $x = 0$ ($i = 0$).** The ghost node $i = -1$ is set to $u_{-1,j} := u_{1,j}$, and $a_1^{-1/2,j} := a_1^{1/2,j}$. The $x$-part of the flux balance at $i=0$ reads, before substitution,
 
 $$
--\Big(a_1^{1/2,j}(u_{1,j}-u_{0,j}) - a_1^{-1/2,j}(u_{0,j}-u_{-1,j})\Big),
+-\left(a_1^{1/2,j}(u_{1,j}-u_{0,j}) - a_1^{-1/2,j}(u_{0,j}-u_{-1,j})\right),
 $$
 
 and substituting $u_{-1,j}=u_{1,j}$, $a_1^{-1/2,j}=a_1^{1/2,j}$ collapses the two flux terms into a single, doubled connection to the interior neighbor $i=1$:

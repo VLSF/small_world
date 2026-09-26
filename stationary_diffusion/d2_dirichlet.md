@@ -2,11 +2,7 @@
 
 `d2_dirichlet.py` discretizes the stationary (anisotropic) diffusion equation
 
-$$
--\frac{\partial}{\partial x}\left(a_1(x, y)\frac{\partial u(x, y)}{\partial x}\right)
--\frac{\partial}{\partial y}\left(a_2(x, y)\frac{\partial u(x, y)}{\partial y}\right) = f(x, y),
-\qquad (x, y) \in (0, 1)^2,
-$$
+$$-\frac{\partial}{\partial x}\left(a_1(x, y)\frac{\partial u(x, y)}{\partial x}\right) -\frac{\partial}{\partial y}\left(a_2(x, y)\frac{\partial u(x, y)}{\partial y}\right) = f(x, y), \qquad (x, y) \in (0, 1)^2,$$
 
 with homogeneous Dirichlet boundary conditions on all four sides of the square
 
@@ -65,12 +61,7 @@ $$
 
 The $y$-derivative term is discretized analogously with $a_2$ and half-points in $y$. Summing both contributions and multiplying through by $h^2$ gives, for every interior node $(i, j)$, $i, j = 0, \dots, N-1$, the five-point stencil equation
 
-$$
-\left(a_1^{i+1/2,j} + a_1^{i-1/2,j} + a_2^{i,j+1/2} + a_2^{i,j-1/2}\right)\, u_{i,j}
-- a_1^{i+1/2,j}\, u_{i+1,j} - a_1^{i-1/2,j}\, u_{i-1,j}
-- a_2^{i,j+1/2}\, u_{i,j+1} - a_2^{i,j-1/2}\, u_{i,j-1}
-= f_{i,j}\, h^2,
-$$
+$$\left(a_1^{i+1/2,j} + a_1^{i-1/2,j} + a_2^{i,j+1/2} + a_2^{i,j-1/2}\right)\, u_{i,j} - a_1^{i+1/2,j}\, u_{i+1,j} - a_1^{i-1/2,j}\, u_{i-1,j} - a_2^{i,j+1/2}\, u_{i,j+1} - a_2^{i,j-1/2}\, u_{i,j-1} = f_{i,j}\, h^2,$$
 
 where $f_{i,j} = f(x_i, y_j)$ and boundary terms ($u_{-1,j}$, $u_{N,j}$, $u_{i,-1}$, $u_{i,N}$) are replaced by $0$ and simply dropped from the equation.
 

@@ -4,7 +4,7 @@ def compute_bump(x, H, K=2):
     mask = (x < H/2) * (x > -H/2)
     return np.cos(np.pi*x/H)**K * mask
 
-def validate_parameters(H, N, K):
+def validate_parameters(H, N, M, K):
     h = 1 / M
     cover_domain = H > h
     reasonable_K = K <= 8
@@ -64,7 +64,7 @@ if __name__ == "__main__":
         H = Hs[i]
         K = Ks[i]
         M = Ms[i]
-        fine = validate_parameters(H, N, K)
+        fine = validate_parameters(H, N, M, K)
         print("boundary conditions", bc, f"H = {H}", f"K = {K}", f"M = {M}")
         print("reasonable parameters?", fine)
         if fine:

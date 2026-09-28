@@ -23,7 +23,7 @@ $$
 Each subdomain is the open square of side $H$ around its center,
 
 $$
-\Omega_{m,n} = \left\{(x,y) \in [0,1]^2 : |x - m h_M| < H/2 ~\text{and}~ |y - n h_M| < H/2\right\}.
+\Omega_{m,n} = \left\\{(x,y) \in [0,1]^2 : |x - m h_M| < H/2 ~\text{and}~ |y - n h_M| < H/2\right\\}.
 $$
 
 Requiring $H > h_M$ (checked by `validate_parameters`) makes neighboring subdomains overlap, so every grid point lies in at least one $\Omega_{m,n}$ and the union of all subdomains covers $[0,1]^2$; `get_partition` returns, for every $\Omega_{m,n}$, the flat grid indices it contains, its weight values there, its $(x,y)$ coordinates, and a normalized copy of the coordinates shifted so the subdomain's own bounding box starts at $(0,0)$.
@@ -42,7 +42,7 @@ $$
 w_{m,n}(x,y) = \frac{\varphi_{c_{m,n}}(x,y)}{\displaystyle\sum_{m',n'} \varphi_{c_{m',n'}}(x,y)},
 $$
 
-makes $\{w_{m,n}\}$ a genuine partition of unity: $\sum_{m,n} w_{m,n} \equiv 1$ wherever the denominator is non-zero, which is guaranteed everywhere on $[0,1]^2$ by the overlap condition $H > h_M$ above. This normalization is exactly what both `get_partition` implementations do, and is what the `__main__` block in each file checks numerically (`partition_of_unity`, via `np.allclose`) together with full coverage of the grid (`cover_all`).
+makes $\\{w_{m,n}\\}$ a genuine partition of unity: $\sum_{m,n} w_{m,n} \equiv 1$ wherever the denominator is non-zero, which is guaranteed everywhere on $[0,1]^2$ by the overlap condition $H > h_M$ above. This normalization is exactly what both `get_partition` implementations do, and is what the `__main__` block in each file checks numerically (`partition_of_unity`, via `np.allclose`) together with full coverage of the grid (`cover_all`).
 
 The two files differ only in the choice of $\mathrm{bump}$.
 

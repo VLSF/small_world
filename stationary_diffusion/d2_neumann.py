@@ -52,10 +52,13 @@ def get_discretization_data(N):
     indices = np.stack([rows, cols], 1)
     return X_half, X_y_half, Y_half, X, Y, indices, N_x, N_y
 
-def get_csc_matrix(X_half, X_y_half, Y_half, X, Y, indices, N_x, N_y, a1, a2, params):
+def get_matrix_data(X_half, X_y_half, Y_half, X, Y, N_x, N_y, a1, a2, params):
     a1_face = a1(X_half, Y, params)              # faces k = 0, ..., N_x-1 (between node k and k+1)
     a2_face = a2(X_y_half, Y_half, params)       # faces k = 0, ..., N_y-2 (between node k and k+1)
+    return get_matrix_data_from_faces(N_x, N_y, a1_face, a2_face)
 
+def get_matrix_data_from_faces(N_x, N_y, a1_face, a2_face):
+    # a1_face has shape (N_x, N_y), a2_face has shape (N_x, N_y-1)
     diag_x = a1_face.copy()
     diag_x[1:] += a1_face[:-1]
     diag_x[0] += a1_face[0]        # Neumann mirror at x=0
@@ -82,10 +85,26 @@ def get_csc_matrix(X_half, X_y_half, Y_half, X, Y, indices, N_x, N_y, a1, a2, pa
         -jm_weight.reshape(-1,),
         -jp_weight.reshape(-1,),
     ])
+    return data
 
+def get_csc_matrix(X_half, X_y_half, Y_half, X, Y, indices, N_x, N_y, a1, a2, params):
+    data = get_matrix_data(X_half, X_y_half, Y_half, X, Y, N_x, N_y, a1, a2, params)
     N_total = N_x * N_y
     A = coo_matrix((data, (indices[:, 0], indices[:, 1])), shape=(N_total, N_total)).tocsc()
     return A
+
+def matrix_data_from_faces_test():
+    x, y, p = sp.symbols('x, y, p')
+    a1 = sp.lambdify((x, y, p), sp.exp(1 + 0.5*sp.cos(sp.pi*(x + 3*y))), 'numpy')
+    a2 = sp.lambdify((x, y, p), 1 + 0.5*sp.sin(sp.pi*(2*x - y)), 'numpy')
+
+    N = 16
+    X_half, X_y_half, Y_half, X, Y, indices, N_x, N_y = get_discretization_data(N)
+    A = get_csc_matrix(X_half, X_y_half, Y_half, X, Y, indices, N_x, N_y, a1, a2, None)
+    data = get_matrix_data_from_faces(N_x, N_y, a1(X_half, Y, None), a2(X_y_half, Y_half, None))
+    B = coo_matrix((data, (indices[:, 0], indices[:, 1])), shape=A.shape).tocsc()
+    print("max difference between matrices", abs(A - B).max())
+    assert abs(A - B).max() == 0
 
 def discretization_test():
     x, y, p = sp.symbols('x, y, p')
@@ -121,5 +140,44 @@ def discretization_test():
     print("expecting convergence order", -2)
     print("observed convergence order", slope)
 
+def discretization_test_anisotropic_from_faces():
+    x, y, p = sp.symbols('x, y, p')
+    a1 = sp.exp(1 + 0.5*sp.cos(sp.pi*(x + 3*y)))
+    a2 = 1 + 0.5*sp.sin(sp.pi*(2*x - y))
+
+    X_part = sp.cos(sp.pi*x/2) + sp.Rational(2, 5)*sp.cos(3*sp.pi*x/2)
+    Y_part = sp.cos(sp.pi*y) - sp.Rational(3, 10)*sp.cos(2*sp.pi*y) + sp.Rational(3, 2)
+    u = X_part * Y_part
+
+    f = - (a1 * u.diff('x')).diff('x') - (a2 * u.diff('y')).diff('y')
+
+    a1 = sp.lambdify((x, y, p), a1, 'numpy')
+    a2 = sp.lambdify((x, y, p), a2, 'numpy')
+    u = sp.lambdify((x, y), u, 'numpy')
+    f = sp.lambdify((x, y), f, 'numpy')
+
+    Ns = [16, 32, 64, 128, 256]
+    errors = []
+    for N in Ns:
+        X_half, X_y_half, Y_half, X, Y, indices, N_x, N_y = get_discretization_data(N)
+        data = get_matrix_data_from_faces(N_x, N_y, a1(X_half, Y, None), a2(X_y_half, Y_half, None))
+        A = coo_matrix((data, (indices[:, 0], indices[:, 1])), shape=(N_x * N_y, N_x * N_y)).tocsc()
+        A = splu(A)
+        rhs = f(X, Y) * (1.0 / N)**2
+        sol = A.solve(rhs.reshape(-1,))
+        exact = u(X, Y).reshape(-1,)
+        errors.append(np.linalg.norm(sol - exact) / np.linalg.norm(exact))
+    errors = np.array(errors)
+    slope, _ = np.polyfit(np.log10(Ns), np.log10(errors), 1)
+    print("expecting convergence order", -2)
+    print("observed convergence order", slope)
+
 if __name__ == "__main__":
+    print("Test 1: convergence, anisotropic coefficients, matrix built from callables")
     discretization_test()
+    print()
+    print("Test 2: matrices built from callables and from face arrays coincide")
+    matrix_data_from_faces_test()
+    print()
+    print("Test 3: convergence, anisotropic coefficients, matrix built from face arrays")
+    discretization_test_anisotropic_from_faces()

@@ -111,7 +111,9 @@ The generator itself only uses the grid coordinates, so it works on either grid;
 
 Every figure below shows three independent samples of $k$ (`contourf`, `plasma` colormap, linear color scale, one color range per panel) and, in the lower-right panel, a histogram of the contrast $k_{\max}/k_{\min}$ over 100 samples at $N=100$. Because the color scale is linear in $k$, a bright (yellow) region means "near the maximum of this sample" and dark blue "near the minimum"; for contrast $10^3$–$10^4$ most of the domain looks dark, and values in the middle of the range are visible only as thin transition layers.
 
-### Isotropic, moderate contrast, $\beta=5$ ($\log_{10}C\in(0.1,2)$)
+### Isotropic fields, moderate contrast
+
+Parameters: $\beta=5$, $\log_{10}C\in(0.1,2)$.
 
 Two-phase media with smooth interfaces. Shorter correlation length gives many small inclusions; longer correlation length gives only one or two large regions per sample. The contrast is distributed roughly like $10^{u}$, i.e. between $\approx1$ and $10^2$, with most samples at low contrast.
 
@@ -123,7 +125,9 @@ Two-phase media with smooth interfaces. Shorter correlation length gives many sm
 
 ![isotropic_2](conductivity_models_figures/isotropic_2.png)
 
-### Isotropic, high contrast, $\beta=5$ ($\log_{10}C\in(3,4)$)
+### Isotropic fields, high contrast
+
+Parameters: $\beta=5$, $\log_{10}C\in(3,4)$.
 
 Same geometry as above, but the two phases differ by three to four orders of magnitude (observed ratios $\approx10^3$–$10^4$), producing strongly ill-conditioned diffusion problems.
 
@@ -135,7 +139,9 @@ Same geometry as above, but the two phases differ by three to four orders of mag
 
 ![isotropic_4](conductivity_models_figures/isotropic_4.png)
 
-### Anisotropic, $\beta=1$
+### Anisotropic fields
+
+Parameters: $\beta=1$.
 
 Here $l_1\gg l_2$, so the correlation is long in $x$ and short in $y$: fields consist of horizontal layers/channels. The smaller $l_2$, the thinner and more numerous the layers; for $l_2=0.01$, which is about the grid spacing at $N=100$, adjacent rows are nearly independent. With $\beta=1$ there is no saturation, so intermediate values of $k$ are common, and the contrast can come close to or exceed what a two-phase medium would give because the maximum and minimum are taken over many nearly independent layers.
 

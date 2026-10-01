@@ -29,13 +29,13 @@ $$
 where only eigenvalues $\lambda > 10^{-12}\lambda_{\max}$ are kept. The Gaussian kernel has very rapidly decaying spectrum, so $W$ has far fewer columns than rows, and the truncation also removes the numerically negative eigenvalues of the nearly singular matrix. With $W_1$ built from $x$ with length $l_1$ and $W_2$ built from $y$ with length $l_2$, the field is
 
 $$
-g = W_1\, C\, W_2^\top, \qquad C_{mn}\sim\mathcal N(0,\sigma^2)\ \text{i.i.d.}
+g = W_1~ C~ W_2^\top, \qquad C_{mn}\sim\mathcal N(0,\sigma^2)\ \text{i.i.d.}
 $$
 
-Writing $\mathrm{vec}$ for the row-major flattening of $g$ (consistent with the index $k(i,j)=j+iN_y$ used in the discretizations), $\mathrm{vec}(g) = (W_1\otimes W_2)\,\mathrm{vec}(C)$, hence $g$ is a zero-mean Gaussian field with the **separable** covariance
+Writing $\mathrm{vec}$ for the row-major flattening of $g$ (consistent with the index $k(i,j)=j+iN_y$ used in the discretizations), $\mathrm{vec}(g) = (W_1\otimes W_2)~\mathrm{vec}(C)$, hence $g$ is a zero-mean Gaussian field with the **separable** covariance
 
 $$
-\mathbb E\left[g(x,y)\,g(x',y')\right] = \sigma^2 \exp\left(-\frac{(x-x')^2}{l_1^2}\right)\exp\left(-\frac{(y-y')^2}{l_2^2}\right).
+\mathbb E\left[g(x,y)~g(x',y')\right] = \sigma^2 \exp\left(-\frac{(x-x')^2}{l_1^2}\right)\exp\left(-\frac{(y-y')^2}{l_2^2}\right).
 $$
 
 Thus $l_1$ and $l_2$ are the correlation lengths in the $x$ and $y$ directions. If $l_1=l_2$ the field is *isotropic* (up to the separable-Gaussian form, which is in fact rotation invariant), if $l_1\neq l_2$ the field is *anisotropic*: structures are elongated along the direction with the longer length. Since $x$ is the first array axis and plotted horizontally, $l_1\gg l_2$ produces horizontal stripes/layers.
@@ -61,7 +61,7 @@ $$
 and the conductivity is
 
 $$
-\ln \tilde k = \frac{\ln C}{2}\,\tanh(\beta z),
+\ln \tilde k = \frac{\ln C}{2}~\tanh(\beta z),
 \qquad
 k = \exp\left(\ln\tilde k - \overline{\ln\tilde k}\right).
 $$

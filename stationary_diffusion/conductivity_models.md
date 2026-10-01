@@ -109,7 +109,7 @@ The generator itself only uses the grid coordinates, so it works on either grid;
 
 ## Visualization
 
-Every figure below shows three independent samples of $k$ (`contourf`, `plasma` colormap, linear color scale, one color range per panel) and, in the lower-right panel, a histogram of the contrast $k_{\max}/k_{\min}$ over 100 samples at $N=100$. Because the color scale is linear in $k$, a bright (yellow) region means "near the maximum of this sample" and dark blue "near the minimum"; for contrast $10^3$–$10^4$ most of the domain looks dark, and values in the middle of the range are visible only as thin transition layers.
+Every figure below shows three independent samples of $k$ (`contourf`, `plasma` colormap, linear color scale, one color range per panel) and, in the lower-right panel, a histogram of the contrast $k_{\max}/k_{\min}$ over 100 samples at $N=100$. Because the color scale is linear in $k$, a bright (yellow) region means "near the maximum of this sample" and dark blue "near the minimum"; for a contrast between $10^3$ and $10^4$ most of the domain looks dark, and values in the middle of the range are visible only as thin transition layers.
 
 ### Isotropic fields, moderate contrast
 
@@ -129,7 +129,7 @@ Two-phase media with smooth interfaces. Shorter correlation length gives many sm
 
 Parameters: $\beta=5$, $\log_{10}C\in(3,4)$.
 
-Same geometry as above, but the two phases differ by three to four orders of magnitude (observed ratios $\approx10^3$–$10^4$), producing strongly ill-conditioned diffusion problems.
+Same geometry as above, but the two phases differ by three to four orders of magnitude (observed ratios roughly from $10^3$ to $10^4$), producing strongly ill-conditioned diffusion problems.
 
 `isotropic_3`, $l=0.2$:
 

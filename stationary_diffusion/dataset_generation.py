@@ -16,6 +16,7 @@ import d2_neumann
 # dataset is the model value at the nodes of the grid of unknowns.
 #
 # Output dictionary (to be stored with np.savez):
+#   "coordinates" (2, N_x, N_y) stack of X and Y of the grid of unknowns (shared)
 #   "k"       (K, N_x, N_y)    conductivity on the grid of unknowns
 #   "f"       (K, N_x, N_y)    source on the grid of unknowns (only if f_model is given)
 #   "u"       (K, N_x, N_y)    solution of A u = h^2 f on the grid of unknowns
@@ -72,6 +73,7 @@ def generate_dataset(K, N, bc, k_model, f_model, rng):
         data_all.append(data)
 
     dataset = {
+        "coordinates": np.stack([X, Y]),
         "k": np.stack(k_all),
         "u": np.stack(u_all),
         "A_data": np.stack(data_all),

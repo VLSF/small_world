@@ -1,0 +1,6 @@
+[project]
+name = "small_world"
+version = "0.0.0"
+
+[tool.setuptools]
+packages = ["models", "partition", "stationary_diffusion"]

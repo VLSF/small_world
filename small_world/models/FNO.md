@@ -1,6 +1,6 @@
 # Fourier neural operators: `FNO` and `FNO_normalised`
 
-`FNO.py` implements a Fourier neural operator (FNO) for functions on the unit cube $[0,1]^D$, $D=1,2,3$, sampled on a uniform grid with periodic Fourier modes. `FNO_normalised.py` subclasses it and rescales the output. Both are [Equinox](https://docs.kidger.site/equinox/) modules written in JAX and are fully compatible with `jit`, `vmap` and `grad`.
+`FNO.py` implements a Fourier neural operator (FNO) [[1]](#references) for functions on the unit cube $[0,1]^D$, $D=1,2,3$, sampled on a uniform grid with periodic Fourier modes. `FNO_normalised.py` subclasses it and rescales the output. Both are [Equinox](https://docs.kidger.site/equinox/) modules written in JAX and are fully compatible with `jit`, `vmap` and `grad`.
 
 ## Notation
 
@@ -27,7 +27,7 @@ $$
    where $`\mathcal K_l`$ is a spectral convolution (below), and $`W^{(1)}_l,W^{(2)}_l`$ are $1\times1$ convolutions $`n_p\to n_p`$.
 4. **Decoder.** $`Q v_L`$, with $Q$ a $1\times1$ convolution $`n_p\to n_{\rm out}`$ and no activation.
 
-Differences from the original FNO, following F-FNO:
+Differences from the original FNO, following F-FNO [[2]](#references):
 
 * There is **no linear bypass** $`W v_l`$ next to the spectral convolution. Instead the spectral convolution is followed by a two-layer pointwise MLP ($W^{(1)},W^{(2)}$ with GELU after each), and the **residual connection wraps this whole block** (including the final nonlinearity).
 * Since the MLP is applied after $`\mathcal K_l`$, the nonlinearity acts on the spectral output rather than on the sum of spectral and bypass terms.
@@ -103,3 +103,8 @@ Properties and caveats:
 * Every output channel has unit $`L_2`$ norm (up to $\varepsilon$), hence the model **cannot represent the amplitude of the solution**. The target data must be normalised in the same way, or the loss has to be scale-invariant, and predictions have to be rescaled by a separately known amplitude.
 * The normalisation is part of the forward pass, so gradients flow through it.
 * The decoder bias is included in the normalised output.
+
+## References
+
+1. Z. Li, N. Kovachki, K. Azizzadenesheli, B. Liu, K. Bhattacharya, A. Stuart, A. Anandkumar. *Fourier Neural Operator for Parametric Partial Differential Equations.* ICLR 2021. [arXiv:2010.08895](https://arxiv.org/abs/2010.08895)
+2. A. Tran, A. Mathews, L. Xie, C. S. Ong. *Factorized Fourier Neural Operators.* ICLR 2023. [arXiv:2111.13802](https://arxiv.org/abs/2111.13802)

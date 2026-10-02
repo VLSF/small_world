@@ -2,8 +2,8 @@ import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import splu
 
-import d2_dirichlet
-import d2_neumann
+from . import d2_dirichlet
+from . import d2_neumann
 
 # Dataset generation for operator learning (k, f) -> u, where
 #   -div k grad u = f   on (0, 1)^2
@@ -93,8 +93,8 @@ def residual_test():
     import jax.numpy as jnp
     from jax.experimental import sparse
 
-    from conductivity_models import isotropic_1
-    from source_models import smooth_source
+    from .conductivity_models import isotropic_1
+    from .source_models import smooth_source
 
     for N in [32, 128]:
         for bc in ["dirichlet", "neumann"]:

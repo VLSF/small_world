@@ -1,9 +1,9 @@
 import time
 import numpy as np
 
-from dataset_generation import generate_dataset
-from conductivity_models import isotropic_1
-from source_models import smooth_source
+from .dataset_generation import generate_dataset
+from .conductivity_models import isotropic_1
+from .source_models import smooth_source
 
 K = 10
 

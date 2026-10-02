@@ -2,7 +2,7 @@ import os
 import argparse
 import numpy as np
 
-import dataset_generation, conductivity_models, source_models
+from . import dataset_generation, conductivity_models, source_models
 
 def get_argparser():
     parser = argparse.ArgumentParser()

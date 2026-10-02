@@ -1,5 +1,5 @@
 import numpy as np
-from conductivity_models import kl_factor
+from .conductivity_models import kl_factor
 
 def get_source_field(X, Y, p, sigma, l1, l2, rng):
     # Standardized Gaussian random field with the Karhunen-Loeve construction used in

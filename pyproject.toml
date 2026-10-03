@@ -3,4 +3,4 @@ name = "small_world"
 version = "0.0.0"
 
 [tool.setuptools]
-packages = ["small_world", "small_world.models", "small_world.partition", "small_world.stationary_diffusion"]
+packages = ["small_world", "small_world.models", "small_world.losses", "small_world.partition", "small_world.stationary_diffusion"]

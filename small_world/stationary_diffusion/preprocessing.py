@@ -80,14 +80,17 @@ def get_quadrature_weights(data):
 
 def get_linear_systems(data):
     """Sparse systems A u = rhs: A_data (K, nnz), A_indices (nnz, 2), A_shape (tuple),
-    rhs (K, n) = h^2 f, sol (K, n). Physical (unscaled) quantities."""
+    rhs, sol (K, n). Physical (unscaled) quantities.
+
+    rhs = h^2 f is (K, n) if the dataset has a source f. For f = 1 it is the single vector
+    h^2 * ones of shape (n,), shared by all samples (no copy per sample)."""
     h = float(data['h'])
     K = data['u'].shape[0]
     n = data['u'][0].size
     if 'f' in data:
         rhs = h**2 * jnp.asarray(data['f']).reshape(K, n)
     else:
-        rhs = jnp.full((K, n), h**2)
+        rhs = jnp.full((n,), h**2)
     sol = jnp.asarray(data['u']).reshape(K, n)
     A_shape = tuple(int(s) for s in data['A_shape'])
     return jnp.asarray(data['A_data']), jnp.asarray(data['A_indices']), A_shape, rhs, sol

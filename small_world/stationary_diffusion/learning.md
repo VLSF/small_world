@@ -11,7 +11,7 @@ This note describes how to go from a dataset (see `dataset_generation.py`) to lo
 | `stationary_diffusion/losses.py` | `regression_loss`, `projection_loss`, `sub_projection_loss` |
 | `stationary_diffusion/metrics.py` | `get_error_regression`, `get_error_projection`, `get_error_sub_projection` |
 | `losses/basic.py`, `losses/projection.py` | equation-independent math on flattened fields: L2 norm, weighted QR, projection loss, Petrov–Galerkin solve |
-| `partition/` | partitions of unity used by the subdomain case |
+| `partition/` | partitions of unity (and the indicator cover) used by the subdomain case |
 
 Dependencies are one-way: `stationary_diffusion` uses `losses` and `partition`, never the reverse.
 
@@ -93,7 +93,7 @@ errors = metrics.get_error_projection(
 The domain is split into overlapping subdomains by `small_world.partition` (centres on an $(M+1)\times(M+1)$ grid, side $H > 1/M$, bump smoothness $K$). The **same** model is applied on every subdomain (it sees the subdomain's features and its coordinates relative to the subdomain corner, divided by the global coordinate scale) and predicts `N_basis` vectors. Each is multiplied by the partition-of-unity weight of its subdomain and extended by zero to the whole grid. All $(M+1)^2 N_{\rm basis}$ vectors are stacked into one global basis, which is then used exactly as in case 2: projection loss for training, Petrov–Galerkin for evaluation.
 
 ```python
-from small_world.partition import cos_partition   # or smoothstep_partition
+from small_world.partition import cos_partition   # or smoothstep_partition, indicator_partition
 
 H, M, K = 0.4, 4, 3
 subdomains = basis.get_subdomains(data, scales, H, M, K, partition=cos_partition)
@@ -111,7 +111,7 @@ errors = metrics.get_error_sub_projection(
 )
 ```
 
-`get_subdomains` takes `bc` and the grid size from the dataset and checks that the partition matches the grid. Subdomains at the boundary are cut by the domain, so they are smaller than interior ones (the model is called once per subdomain shape, which `jit` handles by tracing each shape). `N_modes` is limited by the smallest subdomain (a corner one): with $n$ points in its shortest side, the last Fourier axis has only $n//2+1$ modes, so use `N_modes <= n//2 + 1`. The smallest side can be read off `min(c.shape[1:] for c in subdomains.coords)`.
+`get_subdomains` takes `bc` and the grid size from the dataset and checks that the partition matches the grid. Subdomains at the boundary are cut by the domain, so they are smaller than interior ones (the model is called once per subdomain shape, which `jit` handles by tracing each shape). The partitions `cos_partition` and `smoothstep_partition` give a partition of unity. `indicator_partition` uses the same subdomains but the constant weight $1$ on each (no normalisation, so it is a cover, not a partition of unity, and `K` is ignored); in the training script this is `partition=indicator`. `N_modes` is limited by the smallest subdomain (a corner one): with $n$ points in its shortest side, the last Fourier axis has only $n//2+1$ modes, so use `N_modes <= n//2 + 1`. The smallest side can be read off `min(c.shape[1:] for c in subdomains.coords)`.
 
 ## Using a loss in a training step (sketch)
 
@@ -145,3 +145,5 @@ oracle = lambda feature, coords: feature[:1]       # feed the targets as feature
 err = metrics.get_error_projection(oracle, targets[:3], coords, w, A_data[:3], A_indices, A_shape,
                                    rhs[:3] if rhs.ndim > 1 else rhs, sol[:3])   # ~0
 ```
+
+For the subdomain setup this check holds for the partitions of unity (`cos`, `smoothstep`): the basis contains $w_c u$ and $\sum_c w_c u = u$. It does **not** hold for `indicator_partition`: $u$ is in the span of $\{\mathbb 1_c u\}$ only if $\sum_c a_c \mathbb 1_c \equiv 1$ for some constants $a_c$, which is impossible for overlapping hard-edged subdomains, so the error is not zero there even for a perfect local model.

@@ -5,13 +5,21 @@ small_world/                 # repository root
 ├── pyproject.toml
 └── small_world/             # Python package
     ├── models/              # neural operators (FNO, FNO_normalised), equation-independent
-    ├── partition/           # partitions of unity (cos, smoothstep)
+    ├── partition/           # partitions of unity (cos, smoothstep) and the indicator cover
+    ├── training/            # generic training engine (checkpoints on disk, early stopping) and config
     ├── losses/              # equation-independent math: L2 norm, projection loss, Petrov-Galerkin solve
     └── stationary_diffusion/  # equation-specific: discretizations, random fields, dataset generation,
                              # preprocessing, basis prediction, losses and evaluation
 ```
 
-Dependencies are one-way: `stationary_diffusion` uses `losses` and `partition`; `models` and `losses` know nothing about the equation. Training scripts (not yet added) will combine a model, an equation package and `losses` and live outside the package.
+Dependencies are one-way: `stationary_diffusion` uses `losses` and `partition`; `models` and `losses` know nothing about the equation. Training scripts combine a model, an equation package and `losses` and live outside the package, in `experiments/`.
+
+```
+experiments/
+└── stationary_diffusion/
+    ├── train.py             # training script (config file / key=value options)
+    └── configs/
+```
 
 Each subfolder has its own `.md` file(s) describing the mathematics and the code. To start with learning, read [`stationary_diffusion/learning.md`](small_world/stationary_diffusion/learning.md): it explains preprocessing, the three learning setups (regression, learnable basis, learnable basis on subdomains) and their evaluation, with runnable examples.
 
@@ -21,6 +29,8 @@ Each subfolder has its own `.md` file(s) describing the mathematics and the code
 2. Preprocess it (train-set scales, quadrature weights, linear systems): `stationary_diffusion.preprocessing`.
 3. Choose a model from `models` and a setup: `losses.regression_loss`, `losses.projection_loss` or `losses.sub_projection_loss`.
 4. Evaluate with the matching function of `stationary_diffusion.metrics`.
+5. Train with `experiments/stationary_diffusion/train.py`, see [`training/training.md`](small_world/training/training.md):
+   `python experiments/stationary_diffusion/train.py dataset_path=data/<name>.npz results_path=results setup=projection`
 
 ```python
 import numpy as np
@@ -35,7 +45,7 @@ model = FNO(4, [coords.shape[0] + features.shape[1], 32, 1], 16, 2, random.PRNGK
 loss = losses.regression_loss(model, features[:10], targets[:10], coords, w)
 ```
 
-The losses are plain (not jitted) functions: apply `jit`, `eqx.filter_value_and_grad` and `scan` at the highest level.
+The losses are plain (not jitted) functions: apply `jit`, `eqx.filter_value_and_grad` and `scan` at the highest level (the training engine does this).
 
 ## Installation
 
@@ -66,10 +76,12 @@ Modules use relative imports, so run them as modules (from any directory) rather
 ```
 python -m small_world.partition.cos_partition
 python -m small_world.partition.smoothstep_partition
+python -m small_world.partition.indicator_partition
 python -m small_world.stationary_diffusion.d2_dirichlet
 python -m small_world.stationary_diffusion.d2_neumann
 python -m small_world.stationary_diffusion.dataset_generation       # residual test
 python -m small_world.stationary_diffusion.time_dataset_generation  # timing
+python -m small_world.training.engine                               # training engine on a toy problem
 ```
 
 The losses and metrics have no `__main__` test; the "oracle model" check in `learning.md` (a model returning the true solution must give zero error) plays that role.

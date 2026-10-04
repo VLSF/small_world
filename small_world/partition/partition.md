@@ -78,3 +78,7 @@ Both files' `__main__` blocks run the same four `(bc, H, K, M)` parameter combin
 * **`cover_all`** — checking that the union of all subdomains' returned indices is exactly `range(N_x*N_y)`, i.e. every grid point belongs to at least one subdomain.
 
 `validate_parameters(H, N, M, K)` is run first and gates whether `get_partition` is called at all, rejecting parameters where the subdomains would be too small to overlap ($H \le 1/M$) or where $K$ is unreasonably large ($K > 8$).
+
+## Indicator cover (`indicator_partition.py`)
+
+For experiments without a partition of unity, `indicator_partition.get_partition` returns the same subdomains, indices and coordinates as `cos_partition.get_partition` but with the constant weight $w_{m,n}\equiv 1$ on every subdomain (`K` is accepted and ignored). The weights are not normalised, so they sum to the number of subdomains containing a point (up to 4 for $H<2/M$) instead of $1$: this is a cover of the domain, not a partition of unity. Its `__main__` block checks that the weights are all $1$ and that every grid point is covered.

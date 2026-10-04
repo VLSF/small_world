@@ -17,7 +17,7 @@ def predict_basis(model, feature, coords):
 
 class Subdomains(NamedTuple):
     indices: list  # flat grid indices of each subdomain (rectangle in lexicographic order)
-    bumps: list    # partition of unity weights on each subdomain
+    bumps: list    # weights on each subdomain (partition of unity, or ones for indicator_partition)
     coords: list   # (D, n_1, n_2) subdomain coordinates, shifted to start at 0, global scale
 
 
@@ -40,7 +40,7 @@ def get_subdomains(data, scales, H, M, K, partition=cos_partition):
 
 def predict_sub_basis(model, feature, subdomains):
     """Basis on the subdomains: the shared model is applied on each subdomain, the output is
-    multiplied by the partition of unity weights and extended by zero to the whole grid.
+    multiplied by the weights of the partition (partition of unity, or 1 for indicator_partition) and extended by zero to the whole grid.
     Returns the stacked basis of all subdomains, (N_subdomains * N_basis, n)."""
     C = feature.shape[0]
     n = feature[0].size

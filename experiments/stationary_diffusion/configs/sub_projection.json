@@ -1,0 +1,18 @@
+{
+  "dataset_path": "data/1000_128_smooth_Dirichlet_isotropic_2_11998.npz",
+  "results_path": "results",
+  "setup": "sub_projection",
+  "N_basis": 6,
+  "N_modes": 9,
+  "H": 0.4,
+  "M": 4,
+  "K": 3,
+  "N_train": 800,
+  "N_val": 100,
+  "N_test": 100,
+  "learning_rate": 1e-3,
+  "N_epoch": 500,
+  "stop_each": 25,
+  "patience": 8,
+  "keep_checkpoints": false
+}
